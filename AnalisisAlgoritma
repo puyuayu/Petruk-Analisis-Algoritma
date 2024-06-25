@@ -1,0 +1,189 @@
+//Purwati Ayu Utami (2357051007)
+
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <algorithm> 
+
+using namespace std;
+using namespace chrono;
+
+void swap(int& a, int& b) {
+  int temp = a;
+  a = b;
+  b = temp;
+}
+
+void printArray(vector<int>& arr) {
+  for (int i = 0; i < arr.size(); i++) {
+    cout << arr[i] << " ";
+  }
+  cout << endl;
+}
+
+void generateRandomArray(vector<int>& arr) {
+  for (int i = 0; i < arr.size(); i++) {
+    arr[i] = rand() % 1000; 
+  }
+}
+
+void generateReversedArray(vector<int>& arr) {
+  int value = arr.size();
+  for (int i = 0; i < arr.size(); i++) {
+    arr[i] = value--;
+  }
+}
+
+void measureTime(vector<int>& arr, void (*sortFunc)(vector<int>&), string sortName) {
+  auto start = high_resolution_clock::now();
+  sortFunc(arr);
+  auto stop = high_resolution_clock::now();
+  auto duration = duration_cast<microseconds>(stop - start);
+
+  cout << sortName << " Time: " << duration.count() << " microseconds" << endl;
+}
+
+void bubbleSort(vector<int>& arr) {
+  bool swapped = true;
+  for (int i = 0; i < arr.size() - 1 && swapped; i++) {
+    swapped = false;
+    for (int j = 0; j < arr.size() - 1 - i; j++) {
+      if (arr[j] > arr[j + 1]) {
+        swap(arr[j], arr[j + 1]);
+        swapped = true;
+      }
+    }
+  }
+}
+
+void insertionSort(vector<int>& arr) {
+  for (int i = 1; i < arr.size(); i++) {
+    int key = arr[i];
+    int j = i - 1;
+    while (j >= 0 && arr[j] > key) {
+      arr[j + 1] = arr[j];
+      j--;
+    }
+    arr[j + 1] = key;
+  }
+}
+
+// Algoritma Selection Sort
+void selectionSort(vector<int>& arr) {
+  for (int i = 0; i < arr.size() - 1; i++) {
+    int minIndex = i;
+    for (int j = i + 1; j < arr.size(); j++) {
+      if (arr[j] < arr[minIndex]) {
+        minIndex = j;
+      }
+    }
+    swap(arr[i], arr[minIndex]);
+  }
+}
+
+void merge(vector<int>& arr, int left, int mid, int right) {
+  vector<int> temp(arr.size());
+
+  int i = left, j = mid + 1, k = 0;
+  while (i <= mid && j <= right) {
+    if (arr[i] < arr[j]) {
+      temp[k] = arr[i];
+      i++;
+    } else {
+      temp[k] = arr[j];
+      j++;
+    }
+    k++;
+  }
+
+  while (i <= mid) {
+    temp[k] = arr[i];
+    k++;
+    i++;
+  }
+
+  while (j <= right) {
+    temp[k] = arr[j];
+    k++;
+    j++;
+  }
+
+  for (int i = left; i <= right; i++) {
+    arr[i] = temp[i - left];
+  }
+}
+
+void mergeSort(vector<int>& arr, int left, int right) {
+  if (left < right) {
+    int mid = (left + right) / 2;
+    mergeSort(arr, left, mid);
+    mergeSort(arr, mid + 1, right);
+    merge(arr, left, mid, right);
+  }
+}
+
+int partition(vector<int>& arr, int left, int right) {
+  int pivot = arr[right];
+  int i = (left - 1);
+
+  for (int j = left; j < right; j++) {
+    if (arr[j] <= pivot) {
+      i++;
+      swap(arr[i], arr[j]);
+    }
+  }
+  swap(arr[i + 1], arr[right]);
+  return (i + 1);
+}
+
+void quickSort(vector<int>& arr, int left, int right) {
+  if (left < right) {
+    int pivotIndex = partition(arr, left, right);
+    quickSort(arr, left, pivotIndex - 1);
+    quickSort(arr, pivotIndex + 1, right);
+  }
+}
+
+void quickSortWrapper(vector<int>& arr) {
+  quickSort(arr, 0, arr.size() - 1);
+}
+
+void mergeSortWrapper(vector<int>& arr) {
+  mergeSort(arr, 0, arr.size() - 1);
+}
+
+int main() {
+  vector<int> sizes = {10, 100, 500, 1000, 10000};
+
+  for (int n : sizes) {
+    vector<int> arr(n);
+
+    cout << "\n=== Array of size " << n << " ===" << endl;
+
+    generateRandomArray(arr);
+    cout << "Random Array: " << endl;
+    measureTime(arr, bubbleSort, "Bubble Sort");
+    measureTime(arr, insertionSort, "Insertion Sort");
+    measureTime(arr, selectionSort, "Selection Sort");
+    measureTime(arr, mergeSortWrapper, "Merge Sort");
+    measureTime(arr, quickSortWrapper, "Quick Sort");
+
+    generateReversedArray(arr);
+    cout << "Reversed Array: " << endl;
+    measureTime(arr, bubbleSort, "Bubble Sort");
+    measureTime(arr, insertionSort, "Insertion Sort");
+    measureTime(arr, selectionSort, "Selection Sort");
+    measureTime(arr, mergeSortWrapper, "Merge Sort");
+    measureTime(arr, quickSortWrapper, "Quick Sort");
+
+    sort(arr.begin(), arr.end()); 
+    cout << "Sorted Array: " << endl;
+    measureTime(arr, bubbleSort, "Bubble Sort");
+    measureTime(arr, insertionSort, "Insertion Sort");
+    measureTime(arr, selectionSort, "Selection Sort");
+    measureTime(arr, mergeSortWrapper, "Merge Sort");
+    measureTime(arr, quickSortWrapper, "Quick Sort");
+  }
+
+  return 0;
+}
